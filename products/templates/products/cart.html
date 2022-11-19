@@ -1,0 +1,60 @@
+{% extends "products/base.html" %}
+
+{% block content %}
+
+{% csrf_token %}
+<section class="ftco-section ftco-cart">
+    <div class="container">
+        <div class="col-md-3 col-lg-3 d-flex align-items-center mb-2">
+            <span style="font-size:1.3rem">Currency: </span>
+            <div class="select-wrap col-7">
+                
+                <select name="" id="currencies" class="form-control">
+                    {% for currency in currencies %}
+                        <option value="{{currency.code}}">{{currency.name}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        <div class="row">
+        <div class="col-md-12 ftco-animate">
+            <div class="cart-list">
+                <table class="table">
+                    <thead class="thead-primary">
+                      <tr class="text-center">
+                        <th>&nbsp;</th>
+                        <th>&nbsp;</th>
+                        <th>Product</th>
+                        <th>Price</th>
+                        <th>Quantity</th>
+                      </tr>
+                    </thead>
+                    <tbody id="products">
+                    </tbody>
+                  </table>
+              </div>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+    
+        async function loadProducts(){
+            let selectedCurrency = document.querySelector("#currencies").value
+            let url = `list-cart-product/${selectedCurrency}`
+            let response = await fetch(url);
+            let products = await response.text();
+            document.querySelector("#products").innerHTML = products
+        }
+        loadProducts()
+    
+        document.querySelector("#currencies").onchange = () => {
+            loadProducts()
+        }
+    
+    
+    var stripe = Stripe("{{ STRIPE_PUBLIC_KEY }}");
+            
+    </script>
+    
+
+{% endblock %}

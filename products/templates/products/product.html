@@ -1,0 +1,61 @@
+{% extends "products/base.html" %}
+{% load static %}
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+
+<div class="hero-wrap hero-bread" style="background-image: url('/static/products/images/main-img.jpg');">
+<div class="container">
+  <div class="row no-gutters slider-text align-items-center justify-content-center">
+    <div class="col-md-9 ftco-animate text-center">
+      <h1 class="mb-0 bread">Collections of lamps</h1>
+    </div>
+  </div>
+</div>
+</div>
+
+{% csrf_token %}
+<section class="ftco-section bg-light">
+    <div class="container">
+        <div class="col-md-3 col-lg-3 d-flex align-items-center mb-2">
+            <span style="font-size:1.3rem">Currency: </span>
+            <div class="select-wrap col-7">
+                
+                <select name="" id="currencies" class="form-control">
+                    {% for currency in currencies %}
+                        <option value="{{currency.code}}">{{currency.name}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12 col-lg-12 order-md-last">
+                <div id="products" class="row">
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script type="text/javascript">
+    
+    async function loadProducts(){
+        let selectedCurrency = document.querySelector("#currencies").value
+        let url = `products?currency=${selectedCurrency}`
+        let response = await fetch(url);
+        let products = await response.text();
+        document.querySelector("#products").innerHTML = products
+    }
+    loadProducts()
+
+    document.querySelector("#currencies").onchange = () => {
+        loadProducts()
+    }
+
+
+var stripe = Stripe("{{ STRIPE_PUBLIC_KEY }}");
+        
+</script>
+
+{% endblock %}

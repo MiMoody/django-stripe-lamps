@@ -1,0 +1,24 @@
+{% load static %}
+
+{% for product in products %}
+
+    <div class="col-sm-6 col-md-6 col-lg-4 ftco-animate fadeInUp ftco-animated">
+        <div class="product">
+            <a href="{% url 'detail-product' product.id product.currency_code %}" class="img-prod"><img class="img-fluid" src="/media/{{product.image}}" alt="Colorlib Template">
+                <div class="overlay"></div>
+            </a>
+            <div class="text py-3 px-3">
+                <h3><a href="#">{{ product.name }}</a></h3>
+                <div class="d-flex">
+                    <div class="pricing">
+                        <p class="price"><span>{{ product.price }} <span>{{ product.currency_name }}</span></span></p>
+                    </div>
+                </div>
+                <p class="bottom-area d-flex px-3">
+                    <a onclick="addProduct(this)" data-currency-code="{{product.currency_code}}" data-product_id = "{{product.id}}" class="add-to-cart text-center py-2 mr-1" style="cursor:pointer;"><span>Add to cart <i class="ion-ios-add ml-1"></i></span></a>
+                    <a onclick="createCheckouSessionOneProduct(this)" data-quantity="1" class="checkout-button buy-now text-center py-2" data-url="{% url 'session-one' product.id product.currency_code %}" style="cursor:pointer;">Buy now<span><i class="ion-ios-cart ml-1"></i></span></a>
+                </p>
+            </div>
+        </div>
+    </div>
+{% endfor %}
