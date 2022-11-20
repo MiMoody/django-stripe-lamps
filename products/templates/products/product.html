@@ -40,17 +40,11 @@
 
 <script type="text/javascript">
     
-    async function loadProducts(){
-        let selectedCurrency = document.querySelector("#currencies").value
-        let url = `products?currency=${selectedCurrency}`
-        let response = await fetch(url);
-        let products = await response.text();
-        document.querySelector("#products").innerHTML = products
-    }
-    loadProducts()
+    
+    loadAllProducts()
 
     document.querySelector("#currencies").onchange = () => {
-        loadProducts()
+        loadAllProducts()
     }
 
 

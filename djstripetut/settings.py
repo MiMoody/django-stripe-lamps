@@ -27,6 +27,8 @@ SECRET_KEY = CONFIG.get("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = bool(int(CONFIG.get("DEBUG")))
 
+DOMAIN = CONFIG.get("DOMAIN")
+
 ALLOWED_HOSTS = ["*"]
 
 
@@ -118,6 +120,7 @@ USE_L10N = True
 
 USE_TZ = True
 
+DEFAULT_AUTO_FIELD='django.db.models.AutoField'
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.1/howto/static-files/

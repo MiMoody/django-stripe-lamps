@@ -1,14 +1,22 @@
 import json
-from django.shortcuts import render
 import stripe
 from django.conf import settings
+from django.shortcuts import render
 from django.views.generic import TemplateView
 from django.http import HttpResponse, JsonResponse
 from django.views import View
-from django.db.models import F 
+from django.db.models import F
+from .business_logic.order import create_stripe_payment_items 
 from .business_logic.utils import convert_price_currency_by_stipe
 from .business_logic.try_except import process_exception
-from .models import Product, CurrencyType, ProductPrice, ProductCart
+from .models import (
+    Product,
+    CurrencyType,
+    ProductPrice,
+    ProductCart,
+    ProductOrder,
+    ContentProductOrder,
+    OrderStatus)
 
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
@@ -117,11 +125,12 @@ class CardProductView(View):
             return JsonResponse(status = 400, data = {"empty_currency_code":1})
         if not quantity:
             quantity = 1
+        
         try:
             price_product = ProductPrice.objects.get(product_id=product_id, currency__code=currency_code)
             product_cart = ProductCart.objects.filter(product_price=price_product).first()
             if product_cart:
-                product_cart.quantity+=quantity
+                product_cart.quantity+=int(quantity)
                 product_cart.save()
             else:
                 ProductCart.objects.create(product_price=price_product, quantity=quantity)
@@ -149,6 +158,7 @@ class CardProductView(View):
 class ListCartProductView(View):
     """ Представление для подгрузки товаров из корзины """
     
+    @process_exception(default_value=JsonResponse(data={"unexpected_error":1},status=400))
     def get(self, request, currency_code :str):
         
         cart_products = ProductCart.objects.filter(product_price__currency__code=currency_code) \
@@ -178,8 +188,11 @@ class CheckoutSessionOneProduct(View):
                 name = F("product__name"),
                 image = F("product__image"),
             ).first()
+            
+        if not product:
+            return JsonResponse({"not_found_product":1})
+        
         quantity = request.GET.get("quantity", 1)
-        YOUR_DOMAIN = "http://127.0.0.1:8000"
         checkout_session = stripe.checkout.Session.create(
             payment_method_types=['card'],
             line_items=[
@@ -199,31 +212,40 @@ class CheckoutSessionOneProduct(View):
                 "product_id": product['product_id']
             },
             mode='payment',
-            success_url=YOUR_DOMAIN + '/success/',
-            cancel_url=YOUR_DOMAIN + '/cancel/',
+            success_url=settings.DOMAIN + '/success/',
+            cancel_url=settings.DOMAIN + '/cancel/',
         )
         return JsonResponse({
             'id': checkout_session.id
         })
 
 
-class StripeIntentView(View):
-    def post(self, request, *args, **kwargs):
-        try:
-            req_json = json.loads(request.body)
-            customer = stripe.Customer.create(email=req_json['email'])
-            product_id = self.kwargs["pk"]
-            product = Product.objects.get(id=product_id)
-            intent = stripe.PaymentIntent.create(
-                amount=product.price,
-                currency='usd',
-                customer=customer['id'],
-                metadata={
-                    "product_id": product.id
-                }
-            )
-            return JsonResponse({
-                'clientSecret': intent['client_secret']
-            })
-        except Exception as e:
-            return JsonResponse({ 'error': str(e) })
+class CheckoutSessionMoreProduct(View):
+    """ Создание checkout session для нескольких продуктов """
+    
+    @process_exception(default_value=JsonResponse(data={"unexpected_error":1},status=400))
+    def get(self, request, currency_code :str):
+        """ Возвращает id stripe checkout session для оплаты нескольких продуктов"""
+        
+        cart_products = ProductCart.objects.filter(product_price__currency__code = currency_code) \
+            .select_related("product_price", "product_price__product")
+        
+        if not cart_products:
+            return JsonResponse(data={"empty_cart_products":1}, status=400)
+            
+        checkout_session = stripe.checkout.Session.create(
+            payment_method_types=['card'],
+            line_items=create_stripe_payment_items(cart_products, currency_code),
+            mode='payment',
+            success_url=settings.DOMAIN + '/success/',
+            cancel_url=settings.DOMAIN + '/cancel/',
+        )
+        order = ProductOrder.objects.create(status=OrderStatus.objects.all().first())
+        content_order_products = [ContentProductOrder(product_order=order, product_price=product.product_price) 
+                                  for product in cart_products]
+        ContentProductOrder.objects.bulk_create(content_order_products)    
+        cart_products.delete()
+        
+        return JsonResponse({
+            'id': checkout_session.id
+        })

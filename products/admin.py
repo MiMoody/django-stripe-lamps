@@ -4,7 +4,9 @@ from .models import (
     ProductPrice,
     ContentProductOrder,
     CurrencyType,
-    ProductOrder
+    ProductOrder,
+    OrderStatus,
+    ProductCart
     )
 
 
@@ -13,3 +15,5 @@ admin.site.register(CurrencyType)
 admin.site.register(ProductPrice)
 admin.site.register(ContentProductOrder)
 admin.site.register(ProductOrder)
+admin.site.register(OrderStatus)
+admin.site.register(ProductCart)

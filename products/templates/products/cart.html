@@ -33,25 +33,17 @@
                     </tbody>
                   </table>
               </div>
+              <p class="justify-content-end d-flex"><a  style="color:white;" onclick="createCheckouSessionMoreProduct(this)" id="btn-buy" class="btn btn-black py-3 px-5 mt-4 ">Buy now</a></p>
         </div>
     </div>
 
     <script type="text/javascript">
     
-        async function loadProducts(){
-            let selectedCurrency = document.querySelector("#currencies").value
-            let url = `list-cart-product/${selectedCurrency}`
-            let response = await fetch(url);
-            let products = await response.text();
-            document.querySelector("#products").innerHTML = products
-        }
-        loadProducts()
+        loadCartProducts()
     
         document.querySelector("#currencies").onchange = () => {
-            loadProducts()
+            loadCartProducts()
         }
-    
-    
     var stripe = Stripe("{{ STRIPE_PUBLIC_KEY }}");
             
     </script>

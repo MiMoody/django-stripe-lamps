@@ -41,12 +41,32 @@ class ProductPrice(models.Model):
     def __str__(self):
         return f"{self.product.name} {self.currency.name} {self.price}"
     
+
+class OrderStatus(models.Model):
+    """ Класс хранит статусы заказов """
+    
+    status = models.CharField(max_length=100)
+    
+    def __str__(self):
+        return self.status
+    
+    
+class ProductOrder(models.Model):
+    """ Привязка продуктов к определенному заказу """
+    
+    form_time = models.DateTimeField(auto_now_add=True)
+    status = models.ForeignKey(OrderStatus, related_name="order_status", on_delete=models.PROTECT, null=True, blank=True)
+    
+    def __str__(self):
+        return f"{self.form_time} {self.status.status}"
+
+
 class ContentProductOrder(models.Model):
     """ Связующая таблица для хранения информации 
         о принадлежности продуктов к заказу и вспомогательной информации
     """
     
-    product_order = models.ForeignKey("ContentProductOrder", 
+    product_order = models.ForeignKey(ProductOrder, 
                                       related_name="order_product", 
                                       on_delete=models.PROTECT)
     product_price = models.ForeignKey(ProductPrice, 
@@ -54,22 +74,9 @@ class ContentProductOrder(models.Model):
                                       on_delete=models.PROTECT)
     
     def __str__(self):
-        return f"{self.product_order} {self.product_price.product.name}"
+        return f"{self.product_order.id} {self.product_price.product.name}"
+    
 
-class ProductOrder(models.Model):
-    """ Привязка продуктов к определенному заказу """
-    
-    product_order = models.ForeignKey(
-        ContentProductOrder, related_name="content_order_product", 
-        on_delete=models.PROTECT,
-    )
-    form_time = models.DateTimeField(auto_now_add=True)
-    total_price = models.DecimalField(max_digits=6, decimal_places=2)
-    
-    def __str__(self):
-        return f"{self.form_time} {self.total_price}"
-    
-    
 class ProductCart(models.Model):
     """ Класс хранит информацию о добавленных в корзину продуктов (без привязки к пользователю) """
 
