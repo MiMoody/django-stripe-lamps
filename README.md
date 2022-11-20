@@ -28,7 +28,7 @@ docker run -d --name stripe-lamp -p 9456:8000  mikimoody/moody_lamp
 
 6. http://localhost:9456/ - перейти по адресу 
 
-# Запуск с использованием Docker без сборки
+# Запуск с использованием Docker без сборки (образ лежит на dockerhub: mikimoody/moody_lamp, можно подтянуть docker pull mikimoody/moody_lamp )
 
 1. docker run -d --name stripe-lamp -v /path/to/project/media/:/django-stripe-lamps/media/ -v /path/to/project/localdb/:/django-stripe-lamps/localdb/ -p 9456:8000  moody_lamp
 
