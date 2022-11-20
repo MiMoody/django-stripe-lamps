@@ -1,6 +1,5 @@
 ### Описание запуска приложения MoodyLamp
 
-
 # Использование environment variables
 
 1. Файл с настройками лежит django-stripe-lamps/djstripetut/.env
@@ -36,3 +35,22 @@ docker run -d --name stripe-lamp -p 9456:8000  mikimoody/moody_lamp
 ИЛИ запуск без volumes (но данные из бд и добавленная media во время работы не сохранится):
 
 docker run -d --name stripe-lamp -p 9456:8000  mikimoody/moody_lamp
+
+# Тестовые карты для оплаты stripe
+
+## Успешная оплата:
+
+1. Номер карты: 4242424242424242
+2. Дата: 12/34 
+3. CVC: 111
+
+## Неудачная оплата:
+
+1. Номер карты: 4000000000000002
+2. Дата: 12/34 
+3. CVC: 111
+
+# Доступ к панели Django Admin
+
+1. Login:admin
+2. Password:admin
