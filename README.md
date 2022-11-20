@@ -52,5 +52,6 @@ docker run -d --name stripe-lamp -p 9456:8000  mikimoody/moody_lamp
 
 # Доступ к панели Django Admin
 
+1. Url: http://host:port/admin
 1. Login:admin
 2. Password:admin
